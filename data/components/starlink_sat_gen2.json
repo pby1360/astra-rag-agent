@@ -1,0 +1,19 @@
+{
+  "part_number": "STARLINK-SAT-GEN2",
+  "name": "Starlink Generation 2 Mini Satellite (Virtual Assembly)",
+  "manufacturer": "SpaceX",
+  "category": "assembly",
+  "is_real_part": false,
+  "specs": {},
+  "compliance": [
+    "MIL-STD-883 Method 1019",
+    "MIL-STD-810H Method 514"
+  ],
+  "depends_on": [
+    "TPS7A4501-SP",
+    "XQR5VFX130",
+    "RAD750"
+  ],
+  "source_url": "https://www.spacex.com/updates/starlink/",
+  "notes": "SpaceX Starlink Gen2 Mini 위성 가상 어셈블리. 550km 극궤도(LEO), 5년 운용 목표. 핵심 서브시스템: 전력(TPS7A4501-SP LDO), 통신/페이로드 처리(XQR5VFX130 FPGA), 자세제어 컴퓨터(RAD750 CPU). 실제 내부 부품은 비공개이나 동급 방사선내성 부품 사용 추정."
+}

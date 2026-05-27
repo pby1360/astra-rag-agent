@@ -1,0 +1,23 @@
+{
+  "part_number": "XQR5VFX130",
+  "name": "Space-Grade Virtex-5QV Radiation-Hardened FPGA",
+  "manufacturer": "AMD Xilinx",
+  "category": "fpga",
+  "is_real_part": true,
+  "specs": {
+    "tid_tolerance_krad_si": 1000,
+    "sel_let_threshold_mev_cm2_mg": 100,
+    "sel_immune": true,
+    "operating_temp_min_c": -55,
+    "operating_temp_max_c": 125,
+    "process_nm": 65,
+    "logic_cells": 130000
+  },
+  "compliance": [
+    "MIL-STD-883 Method 1019",
+    "MIL-PRF-38535"
+  ],
+  "depends_on": [],
+  "source_url": "https://docs.amd.com/v/u/en-US/ds192_V5QV_Device_Overview",
+  "notes": "우주용 고밀도 FPGA. TID 1 Mrad(Si) 보장. SEL 완전 면역(LET >100 MeV-cm²/mg). 65nm CMOS."
+}

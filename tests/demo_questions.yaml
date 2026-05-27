@@ -1,0 +1,93 @@
+# 시연용 회귀 질문 목록
+# 각 항목: question, scenario, expect_keywords(답변에 포함되어야 할 단어), expect_sources(출처 label에 포함될 단어)
+# regression.py 가 이 파일을 읽어 자동 검증한다.
+
+scenarios:
+  - id: S1_vibration_cascade
+    name: "진동 규격 연쇄 위반 탐지 (GraphRAG)"
+    question: "LV-ENGINE-X 엔진의 진동 규격이 MIL-STD-810H Method 514 Category 24로 상향되면, 하위 부품 중 기준 미달인 것을 모두 찾아줘."
+    expect_keywords:
+      - "AVIONICS-MOD-E"
+      - "14.1"
+      - "FAIL"
+    expect_sources:
+      - "LV-ENGINE-X"
+    expect_not: []
+
+  - id: S1b_vibration_single
+    name: "단일 부품 진동 판정 (FAIL)"
+    question: "FUEL-VALVE-C의 진동 내구(g rms)가 MIL-STD-810H Category 24 기준을 충족하는지 판정해줘."
+    expect_keywords:
+      - "9.5"
+      - "14.1"
+    expect_sources:
+      - "FUEL-VALVE-C"
+    expect_not:
+      - "정보 없음"
+
+  - id: S2_radiation
+    name: "COTS 방사선 교차검증"
+    question: "TI TPS7H1101-SP를 GEO 15년 임무에 쓰려는데 방사선(TID) 기준을 충족해?"
+    expect_keywords:
+      - "100"
+      - "PASS"
+    expect_sources:
+      - "TPS7H1101"
+    expect_not: []
+
+  - id: S3_saltfog_ko
+    name: "염수분무 코팅 두께 (한국어 쿼리)"
+    question: "K-방산 수출용 안테나 전개 장치, 염수 분무(소금물) 테스트 통과하려면 내부식성 코팅 두께를 얼마로 해야 해?"
+    expect_keywords:
+      - "20"
+    expect_sources:
+      - "corrosion"
+    expect_not:
+      - "정보 없음"
+
+  - id: S4_self_correction
+    name: "Self-correction 데모 (존재하지 않는 부품)"
+    question: "UNKNOWN-PART-ZZZ9의 진동 내구가 Category 24를 충족하는지 판정해줘."
+    expect_keywords:
+      - "정보 없음"
+    expect_sources: []
+    expect_not:
+      - "PASS"
+      - "FAIL"
+
+  - id: S5_spacex_starlink_tid
+    name: "SpaceX Starlink 방사선 내성 종합 판정 (GraphRAG)"
+    question: "STARLINK-SAT-GEN2 위성 어셈블리의 하위 부품들이 Starlink 550km LEO 5년 임무 방사선(TID) 요구치를 모두 충족하는지 판정해줘."
+    expect_keywords:
+      - "15"
+      - "PASS"
+      - "TPS7A4501-SP"
+    expect_sources:
+      - "STARLINK-SAT-GEN2"
+    expect_not:
+      - "정보 없음"
+
+  - id: S6_spacex_falcon9_vibration
+    name: "Falcon 9 발사 진동 기준 조회"
+    question: "Falcon 9으로 발사할 때 페이로드에 가해지는 랜덤 진동 기준이 얼마야?"
+    expect_keywords:
+      - "8.8"
+      - "g rms"
+    expect_sources:
+      - "spacex"
+    expect_not:
+      - "PASS"
+      - "FAIL"
+
+  - id: S7_spacex_rad750_description
+    name: "RAD750 부품 설명 (유형 C)"
+    question: "BAE Systems RAD750 프로세서에 대해 설명해봐."
+    expect_keywords:
+      - "RAD750"
+      - "PowerPC"
+      - "200"
+    expect_sources:
+      - "RAD750"
+    expect_not:
+      - "PASS"
+      - "FAIL"

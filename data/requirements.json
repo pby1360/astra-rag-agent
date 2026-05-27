@@ -1,0 +1,55 @@
+{
+  "_comment": "시나리오별 규격 요구 임계치. build_kg.py 가 Requirement 노드(HAS_REQUIREMENT)로 적재하고, Verifier 가 부품 스펙과 대조해 PASS/FAIL 을 판정한다.",
+  "requirements": [
+    {
+      "id": "REQ-VIB-CAT24",
+      "standard": "MIL-STD-810H Method 514",
+      "category": "vibration",
+      "parameter": "vibration_grms",
+      "operator": ">=",
+      "threshold": 14.1,
+      "unit": "g rms",
+      "description": "Category 24 (Extreme) 랜덤 진동 최소 내구 요구치"
+    },
+    {
+      "id": "REQ-TID-GEO15",
+      "standard": "MIL-STD-883 Method 1019",
+      "category": "radiation",
+      "parameter": "tid_tolerance_krad_si",
+      "operator": ">=",
+      "threshold": 50,
+      "unit": "krad(Si)",
+      "description": "GEO 15년 임무 총이온화선량(TID) 요구치"
+    },
+    {
+      "id": "REQ-SALTFOG-COAT",
+      "standard": "MIL-STD-810H Method 509",
+      "category": "corrosion",
+      "parameter": "corrosion_coating_thickness_um",
+      "operator": ">=",
+      "threshold": 20,
+      "unit": "um",
+      "description": "해안/염수 환경 최소 내부식 코팅 두께"
+    },
+    {
+      "id": "REQ-TID-STARLINK5",
+      "standard": "SpaceX Starlink Gen2 LEO Environment Specification",
+      "category": "radiation",
+      "parameter": "tid_tolerance_krad_si",
+      "operator": ">=",
+      "threshold": 15,
+      "unit": "krad(Si)",
+      "description": "Starlink 550km LEO 5년 임무 총이온화선량(TID) 요구치. 태양 최대 활동기 마진 포함."
+    },
+    {
+      "id": "REQ-VIB-FALCON9",
+      "standard": "SpaceX Falcon 9 Payload Acoustic and Vibration Environment",
+      "category": "vibration",
+      "parameter": "vibration_grms",
+      "operator": ">=",
+      "threshold": 8.8,
+      "unit": "g rms",
+      "description": "Falcon 9 PAF(Payload Attach Fitting) 기준 랜덤 진동 최소 내구 요구치 (20-2000 Hz)"
+    }
+  ]
+}

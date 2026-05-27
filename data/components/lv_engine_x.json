@@ -1,0 +1,12 @@
+{
+  "part_number": "LV-ENGINE-X",
+  "name": "Launch Vehicle Main Engine Assembly",
+  "manufacturer": "Internal (가상)",
+  "category": "assembly",
+  "is_real_part": false,
+  "specs": {},
+  "compliance": ["MIL-STD-810H Method 514"],
+  "depends_on": ["VIB-DAMPER-B", "FUEL-VALVE-C", "SENSOR-BRKT-D", "AVIONICS-MOD-E"],
+  "source_url": null,
+  "notes": "시나리오1: 진동 규격이 MIL-STD-810H Method 514 Category 24(Extreme)로 상향될 때 영향받는 하위부품을 그래프로 추적."
+}

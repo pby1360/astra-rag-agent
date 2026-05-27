@@ -1,0 +1,21 @@
+{
+  "part_number": "TPS7H1101-SP",
+  "name": "Radiation-Hardened 3-A Low-Dropout (LDO) Voltage Regulator",
+  "manufacturer": "Texas Instruments",
+  "category": "power_regulator",
+  "is_real_part": true,
+  "specs": {
+    "tid_tolerance_krad_si": 100,
+    "eldrs_free_krad_si": 100,
+    "sel_let_threshold_mev_cm2_mg": 85,
+    "operating_temp_min_c": -55,
+    "operating_temp_max_c": 125,
+    "input_voltage_min_v": 1.5,
+    "input_voltage_max_v": 7.0,
+    "output_current_max_a": 3.0
+  },
+  "compliance": ["MIL-STD-883 Method 1019"],
+  "depends_on": [],
+  "source_url": "https://www.ti.com/product/TPS7H1101-SP",
+  "notes": "데이터시트 실측: RHA up to TID 100 krad(Si), ELDRS-free, SEL LET 85 MeV-cm2/mg. 군용 -55~125C."
+}

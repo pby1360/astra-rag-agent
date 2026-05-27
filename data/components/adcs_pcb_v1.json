@@ -1,0 +1,15 @@
+{
+  "part_number": "ADCS-PCB-V1",
+  "name": "CubeSat Attitude Determination and Control (ADCS) PCB",
+  "manufacturer": "Internal (가상)",
+  "category": "assembly",
+  "is_real_part": false,
+  "specs": {
+    "mission_orbit": "GEO",
+    "mission_life_years": 15
+  },
+  "compliance": ["SMC-S-016", "MIL-STD-883 Method 1019"],
+  "depends_on": ["SAMV71Q21RT", "TPS7H1101-SP"],
+  "source_url": null,
+  "notes": "시나리오2: 상용 MCU(SAMV71)/LDO(TPS7H1101)를 우주 ADCS에 적용 가능한지 방사선(TID) 교차검증."
+}

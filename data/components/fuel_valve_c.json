@@ -1,0 +1,16 @@
+{
+  "part_number": "FUEL-VALVE-C",
+  "name": "Cryogenic Fuel Control Valve",
+  "manufacturer": "Internal (가상)",
+  "category": "mechanical",
+  "is_real_part": false,
+  "specs": {
+    "vibration_grms": 9.5,
+    "operating_temp_min_c": -196,
+    "operating_temp_max_c": 80
+  },
+  "compliance": ["MIL-STD-810H Method 514"],
+  "depends_on": [],
+  "source_url": null,
+  "notes": "시나리오1: 진동 내구 9.5 g rms -> Category 24 기준(14.1) 미달 FAIL. 설계변경 영향 부품."
+}

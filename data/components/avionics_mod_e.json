@@ -1,0 +1,15 @@
+{
+  "part_number": "AVIONICS-MOD-E",
+  "name": "Engine Avionics Control Module",
+  "manufacturer": "Internal (가상)",
+  "category": "electronic",
+  "is_real_part": false,
+  "specs": {
+    "operating_temp_min_c": -40,
+    "operating_temp_max_c": 85
+  },
+  "compliance": ["MIL-STD-810H Method 514", "MIL-STD-461G"],
+  "depends_on": [],
+  "source_url": null,
+  "notes": "시나리오1: 진동(vibration_grms) 스펙이 데이터시트에 없음 -> Verifier 가 INSUFFICIENT 판정, 자기수정(재검색) 트리거 데모용."
+}

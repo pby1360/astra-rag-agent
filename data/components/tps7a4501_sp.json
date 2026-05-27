@@ -1,0 +1,21 @@
+{
+  "part_number": "TPS7A4501-SP",
+  "name": "Space-Grade 1.5A Low-Dropout Regulator",
+  "manufacturer": "Texas Instruments",
+  "category": "power",
+  "is_real_part": true,
+  "specs": {
+    "tid_tolerance_krad_si": 100,
+    "output_current_max_a": 1.5,
+    "operating_temp_min_c": -40,
+    "operating_temp_max_c": 125,
+    "eldrs_free": true
+  },
+  "compliance": [
+    "MIL-STD-883 Method 1019",
+    "MIL-PRF-38535"
+  ],
+  "depends_on": [],
+  "source_url": "https://www.ti.com/product/TPS7A4501-SP",
+  "notes": "All-bipolar 우주용 LDO. TID 100 krad(Si) MIL-STD-883 TM1019 조건 A/B 인증. 150 krad 통과 마진 확인됨. TPS7H1101-SP 대비 낮은 출력 전류(1.5A vs 3A)."
+}

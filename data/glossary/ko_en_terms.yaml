@@ -1,0 +1,201 @@
+# 한·영 용어집 — 현장 국문/은어 ↔ 영문 규격 용어 매핑.
+#
+# 용도
+#   1) Phase 6 쿼리 확장: 질의에 ko 또는 aliases 가 포함되면 en(+en_aliases)을 덧붙여
+#      한국어 질의를 영문 원천 문서 벡터 공간에 매핑한다.
+#   2) mini-doc 으로 임베딩되어 벡터/BM25 검색의 한영 가교 역할을 한다.
+#
+# 필드
+#   ko        : 대표 국문 용어 (필수)
+#   aliases   : 현장 은어·동의어 (선택)
+#   en        : 대표 영문 용어 (필수)
+#   en_aliases: 영문 동의어 (선택)
+#   standard  : 관련 규격/메서드 (선택)
+#   category  : 환경시험 분류 (선택)
+
+terms:
+  # --- 진동 / 충격 (시나리오 1) ---
+  - ko: 진동 시험
+    aliases: [진동 규격, 진동 테스트, 떨림 시험]
+    en: Vibration Test
+    standard: MIL-STD-810H Method 514
+    category: vibration
+  - ko: 출력 스펙트럼 밀도
+    aliases: [PSD, 진동 밀도]
+    en: Power Spectral Density
+    en_aliases: [PSD]
+    standard: MIL-STD-810H Method 514
+    category: vibration
+  - ko: 가속도 실효값
+    aliases: [g rms, 그램스, 진동 강도]
+    en: Acceleration RMS
+    en_aliases: [g rms, GRMS]
+    category: vibration
+  - ko: 기계적 충격
+    aliases: [충격 시험, 쇼크 테스트]
+    en: Mechanical Shock
+    en_aliases: [Shock Test]
+    standard: MIL-STD-810H Method 516
+    category: shock
+  - ko: 분류 24
+    aliases: [카테고리 24, Category 24, 극한 진동]
+    en: Category 24
+    en_aliases: [Extreme Vibration]
+    standard: MIL-STD-810H Method 514
+    category: vibration
+
+  # --- 부식 / 염수 (시나리오 3) ---
+  - ko: 염수 분무
+    aliases: [소금물 테스트, 염수분무, 소금물 시험, 염수 시험]
+    en: Salt Fog
+    en_aliases: [Salt Fog Test, Salt Spray]
+    standard: MIL-STD-810H Method 509
+    category: corrosion
+  - ko: 내부식성
+    aliases: [부식 방지, 방청]
+    en: Corrosion Resistance
+    category: corrosion
+  - ko: 코팅 두께
+    aliases: [도막 두께, 도장 두께]
+    en: Coating Thickness
+    category: corrosion
+  - ko: 표면 처리
+    aliases: [도장, 도금]
+    en: Surface Finish
+    en_aliases: [Surface Treatment, Coating]
+    category: corrosion
+
+  # --- 방사선 (시나리오 2) ---
+  - ko: 총이온화선량
+    aliases: [TID, 누적 방사선량, 방사능 내성]
+    en: Total Ionizing Dose
+    en_aliases: [TID]
+    standard: MIL-STD-883 Method 1019
+    category: radiation
+  - ko: 단일 사건 효과
+    aliases: [SEE, 단일 입자 효과]
+    en: Single Event Effects
+    en_aliases: [SEE]
+    category: radiation
+  - ko: 방사선 경화
+    aliases: [내방사선, 방사선 강화, rad-hard]
+    en: Radiation Hardened
+    en_aliases: [Rad-Hard, Radiation Tolerant]
+    category: radiation
+  - ko: 라드
+    aliases: [krad, 킬로라드]
+    en: rad
+    en_aliases: [krad]
+    category: radiation
+
+  # --- 온도 / 습도 / 압력 ---
+  - ko: 고온 시험
+    aliases: [고온 규격, 열 시험]
+    en: High Temperature
+    standard: MIL-STD-810H Method 501
+    category: temperature
+  - ko: 저온 시험
+    aliases: [저온 규격, 한랭 시험]
+    en: Low Temperature
+    standard: MIL-STD-810H Method 502
+    category: temperature
+  - ko: 온도 충격
+    aliases: [열충격, 급온도변화]
+    en: Temperature Shock
+    standard: MIL-STD-810H Method 503
+    category: temperature
+  - ko: 동작 온도 범위
+    aliases: [작동 온도, 사용 온도]
+    en: Operating Temperature Range
+    category: temperature
+  - ko: 습도 시험
+    aliases: [습도 규격, 다습 시험]
+    en: Humidity
+    standard: MIL-STD-810H Method 507
+    category: humidity
+  - ko: 저압 시험
+    aliases: [고도 시험, 감압 시험]
+    en: Low Pressure
+    en_aliases: [Altitude]
+    standard: MIL-STD-810H Method 500
+    category: pressure
+
+  # --- 전자파 (EMI/EMC) ---
+  - ko: 전자파 간섭
+    aliases: [EMI, 전자기 간섭]
+    en: Electromagnetic Interference
+    en_aliases: [EMI]
+    standard: MIL-STD-461G
+    category: emc
+  - ko: 전자파 적합성
+    aliases: [EMC, 전자기 적합성]
+    en: Electromagnetic Compatibility
+    en_aliases: [EMC]
+    standard: MIL-STD-461G
+    category: emc
+  - ko: 전도성 방출
+    aliases: [CE, 전도 방출]
+    en: Conducted Emission
+    en_aliases: [CE101, CE102]
+    standard: MIL-STD-461G
+    category: emc
+  - ko: 복사성 감수성
+    aliases: [RS, 복사 내성]
+    en: Radiated Susceptibility
+    en_aliases: [RS103]
+    standard: MIL-STD-461G
+    category: emc
+
+  # --- 부품 / 일반 ---
+  - ko: 상용 부품
+    aliases: [COTS, 기성품, 상업용 부품]
+    en: Commercial Off-The-Shelf
+    en_aliases: [COTS]
+    category: general
+  - ko: 부품 번호
+    aliases: [파트 넘버, 품번, P/N]
+    en: Part Number
+    en_aliases: [Part Number, P/N]
+    category: general
+  - ko: 데이터시트
+    aliases: [규격서, 사양서]
+    en: Datasheet
+    category: general
+  - ko: 마이크로컨트롤러
+    aliases: [MCU, 마이컴]
+    en: Microcontroller
+    en_aliases: [MCU]
+    category: general
+  - ko: 전원 부품
+    aliases: [레귤레이터, 전압 조정기]
+    en: Power Regulator
+    en_aliases: [Voltage Regulator, LDO]
+    category: general
+  - ko: 자세제어계
+    aliases: [ADCS, 자세 제어]
+    en: Attitude Determination and Control
+    en_aliases: [ADCS]
+    category: general
+  - ko: 큐브위성
+    aliases: [초소형 위성, 큐브샛]
+    en: CubeSat
+    en_aliases: [Small Satellite]
+    category: general
+  - ko: 안테나 전개 장치
+    aliases: [전개 장치, 안테나 전개]
+    en: Antenna Deployment Mechanism
+    category: general
+  - ko: 시험 방법
+    aliases: [메서드, 시험 절차]
+    en: Test Method
+    en_aliases: [Method]
+    category: general
+  - ko: 합격 판정
+    aliases: [합불, 통과 여부]
+    en: Pass/Fail Criteria
+    category: general
+  - ko: 설계 변경
+    aliases: [ECO, 설계변경지시]
+    en: Engineering Change Order
+    en_aliases: [ECO]
+    category: general

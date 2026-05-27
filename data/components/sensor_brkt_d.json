@@ -1,0 +1,16 @@
+{
+  "part_number": "SENSOR-BRKT-D",
+  "name": "Thrust Vector Sensor Bracket",
+  "manufacturer": "Internal (가상)",
+  "category": "mechanical",
+  "is_real_part": false,
+  "specs": {
+    "vibration_grms": 14.1,
+    "operating_temp_min_c": -55,
+    "operating_temp_max_c": 125
+  },
+  "compliance": ["MIL-STD-810H Method 514"],
+  "depends_on": [],
+  "source_url": null,
+  "notes": "시나리오1: 진동 내구 14.1 g rms -> Category 24 기준(14.1) 경계 PASS."
+}

@@ -1,0 +1,23 @@
+{
+  "part_number": "RAD750",
+  "name": "Radiation-Hardened PowerPC Microprocessor",
+  "manufacturer": "BAE Systems",
+  "category": "processor",
+  "is_real_part": true,
+  "specs": {
+    "tid_tolerance_krad_si": 200,
+    "sel_immune": true,
+    "clock_mhz": 133,
+    "power_consumption_w": 6.0,
+    "operating_temp_min_c": -55,
+    "operating_temp_max_c": 125,
+    "process_nm": 250
+  },
+  "compliance": [
+    "MIL-STD-883",
+    "MIL-PRF-38535"
+  ],
+  "depends_on": [],
+  "source_url": "https://www.baesystems.com/en-media/uploadFile/20210404045936/1434555668211.pdf",
+  "notes": "PowerPC 750 기반 우주용 프로세서. 100개 이상 위성에 탑재(GPS III 포함). TID 200 krad(Si). SEL 면역. 240 MIPS @ 133 MHz."
+}

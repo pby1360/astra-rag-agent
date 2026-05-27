@@ -1,0 +1,18 @@
+{
+  "part_number": "SAMV71Q21RT",
+  "name": "Radiation-Tolerant 32-bit Arm Cortex-M7 Microcontroller",
+  "manufacturer": "Microchip Technology",
+  "category": "microcontroller",
+  "is_real_part": true,
+  "specs": {
+    "tid_tolerance_krad_si": 30,
+    "sel_let_threshold_mev_cm2_mg": 60,
+    "operating_temp_min_c": -55,
+    "operating_temp_max_c": 125,
+    "clock_max_mhz": 300
+  },
+  "compliance": ["MIL-STD-883 Method 1019"],
+  "depends_on": [],
+  "source_url": "https://www.microchip.com/en-us/product/samv71q21rt",
+  "notes": "데이터시트 실측(DS60001555): TID 30 krad(Si) RHA, LET 60 MeV-cm2/mg 이하 SEL 없음. -55~125C."
+}

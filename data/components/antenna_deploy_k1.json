@@ -1,0 +1,17 @@
+{
+  "part_number": "ANT-DEPLOY-K1",
+  "name": "K-Defense Antenna Deployment Mechanism",
+  "manufacturer": "Internal (가상)",
+  "category": "mechanical",
+  "is_real_part": false,
+  "specs": {
+    "corrosion_coating_thickness_um": 25,
+    "salt_fog_test_hours": 96,
+    "operating_temp_min_c": -40,
+    "operating_temp_max_c": 71
+  },
+  "compliance": ["MIL-STD-810H Method 509"],
+  "depends_on": [],
+  "source_url": null,
+  "notes": "시나리오3: 중동 수출용. 염수분무(Salt Fog) 내부식 코팅 두께 25um -> 기준(20um) 충족 PASS."
+}
