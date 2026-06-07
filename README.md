@@ -161,6 +161,6 @@ astra-rag-agent/
 | GraphRAG (Neo4j) | 핵심 포함 | ✅ 유지 — DEPENDS_ON 재귀 순회 구현 |
 | 하이브리드 검색 | Dense+BM25+RRF | ✅ 완전 구현 (한영 확장 포함) |
 | LangGraph self-correction | verify→retry 루프 | ✅ 구현 (MAX_RETRIES=2) |
-| MSA / Spring Boot | 향후 발전 | ❌ 제외 (3주 범위 초과) |
+| MSA / Spring Boot | 향후 발전 | ❌ 제외 (기간 내 범위 초과) |
 | 멀티에이전트 | 향후 발전 | ❌ 제외 (단일 LangGraph 워크플로우) |
 | LlamaParse | 810H 핵심 메서드 | ⚠️ 검증 완료, 전체 실행은 선택적 |

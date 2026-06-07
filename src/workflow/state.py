@@ -13,6 +13,7 @@ class RAGState(TypedDict, total=False):
     expanded_query: str         # 한영 확장된 질의
     known_components: list      # 질의에서 인식된 등록 부품 번호
     category: Optional[str]     # 판정 카테고리 (vibration/radiation/corrosion)
+    query_type: str             # 결정론적 라우팅 결과: "A"(기준조회) / "B"(판정) / "C"(설명) / "D"(절차)
     docs: list                  # 누적 검색 문서 (그래프 + 하이브리드)
     is_sufficient: bool         # verify 결과: 판정에 충분한가
     retry_count: int            # retrieve 진입 횟수 (무한루프 방지)

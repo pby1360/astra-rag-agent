@@ -103,6 +103,44 @@ def _load_components() -> list[dict]:
     return chunks
 
 
+def _load_requirements() -> list[dict]:
+    """data/requirements.json 의 임계치를 청크로 변환.
+
+    그래프 분기를 타지 않는 자유 질의(known_components=[])에서도
+    임계치(예: Category 24 = 14.1 g rms)가 검색되도록 Chroma 에 적재한다.
+    각 임계치 = 청크 1개. ID 는 'requirement::REQ-*'.
+    """
+    req_path = config.DATA_DIR / "requirements.json"
+    if not req_path.exists():
+        return []
+    data = json.loads(req_path.read_text(encoding="utf-8"))
+    chunks: list[dict] = []
+    for r in data.get("requirements", []):
+        unit = r.get("unit", "")
+        text = (
+            f"규격 요구치 {r['id']} — {r['standard']}\n"
+            f"- 카테고리(Category): {r.get('category', '')}\n"
+            f"- 파라미터(Parameter): {r['parameter']}\n"
+            f"- 기준(Threshold): {r['operator']} {r['threshold']} {unit}\n"
+            f"- 설명: {r.get('description', '')}"
+        )
+        chunks.append({
+            "id": f"requirement::{r['id']}",
+            "text": text,
+            "metadata": {
+                "doc_type": "requirement",
+                "source": "requirements.json",
+                "standard": str(r.get("standard", "")),
+                "category": str(r.get("category", "")),
+                "parameter": str(r.get("parameter", "")),
+                "threshold": float(r.get("threshold", 0)),
+                "unit": str(unit),
+                "requirement_id": str(r.get("id", "")),
+            },
+        })
+    return chunks
+
+
 def _load_glossary() -> list[dict]:
     if not config.GLOSSARY_PATH.exists():
         return []
@@ -132,7 +170,7 @@ def _load_glossary() -> list[dict]:
 
 def load_all() -> list[dict]:
     """전체 소스를 청크 리스트로 로딩."""
-    return _load_standards() + _load_components()
+    return _load_standards() + _load_components() + _load_requirements()
 
 
 if __name__ == "__main__":

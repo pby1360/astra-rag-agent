@@ -41,6 +41,16 @@ def citation_label(meta: dict) -> str:
     """검색 결과 메타데이터를 사람이 읽는 출처 라벨로."""
     if meta.get("doc_type") == "component":
         return f"부품 {meta.get('part_number','')} ({meta.get('source','')})"
+    if meta.get("doc_type") == "graph":
+        pn = meta.get("part_number", "")
+        std = meta.get("standard", "")
+        asm = meta.get("assembly", "")
+        base = f"부품 {pn}" if pn else "지식그래프"
+        if asm and asm != pn:
+            base = f"{base} ⊂ {asm}"  # 하위 부품임을 명시
+        return f"{base} · {std} (neo4j)" if std else f"{base} (neo4j)"
+    if meta.get("doc_type") == "requirement":
+        return f"규격 요구치 {meta.get('requirement_id','')} ({meta.get('source','')})"
     if meta.get("doc_type") == "glossary":
         return "용어집 (ko_en_terms.yaml)"
     std = meta.get("standard", "")

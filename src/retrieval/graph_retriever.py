@@ -151,6 +151,62 @@ def assess_assembly(assembly_pn: str, category: str, max_depth: int = 3) -> dict
     return {"requirement": req, "assembly": assembly_pn, "results": results}
 
 
+def assess_single_component(part_number: str, category: str) -> dict | None:
+    """리프(하위 부품 없는) 부품 1개를 카테고리 요구치와 직접 대조해 판정한다 (시나리오 S1b).
+
+    조립체가 아닌 단일 부품 질의에서도 그래프 노드의 스펙과 규격 임계치를
+    결정론적으로 비교해 PASS/FAIL/INSUFFICIENT 를 산출한다. 값이 없으면(스펙 누락)
+    INSUFFICIENT 를 반환하여 self-correction 루프가 정상 동작하도록 한다.
+
+    반환: {component, requirement, value, verdict} 또는 None
+    """
+    node = get_component(part_number)
+    if node is None:
+        return None
+    req = get_requirement_by_category(category)
+    if req is None:
+        return None
+    node = dict(node)
+    param, op, thr = req["parameter"], req["operator"], req["threshold"]
+    value = node.get(param)
+    verdict = _judge(value, op, thr)
+    logger.info("단일 부품 판정 | %s | %s=%s | 기준 %s%s | → %s",
+                part_number, param, value, op, thr, verdict)
+    return {"component": node, "requirement": req, "value": value, "verdict": verdict}
+
+
+def single_assessment_to_document(assessment: dict | None) -> list[dict]:
+    """단일 부품 판정 결과를 generator 가 인용할 수 있는 텍스트 문서로 변환."""
+    if not assessment:
+        return []
+    req = assessment["requirement"]
+    node = assessment["component"]
+    value = assessment["value"]
+    verdict = assessment["verdict"]
+    pn = node.get("part_number", "")
+    val = "정보 없음" if value is None else f"{value} {req.get('unit', '')}"
+    text = (
+        f"[그래프] 부품 {pn}({node.get('name', '')}) 단일 적합성 판정.\n"
+        f"  - {req['parameter']} = {val}\n"
+        f"  - 요구치({req['id']}, {req['standard']}): "
+        f"{req['operator']} {req['threshold']} {req.get('unit', '')} "
+        f"— {req.get('description', '')}\n"
+        f"  - 판정: {verdict}"
+    )
+    return [{
+        "id": f"graph::single::{pn}",
+        "text": text,
+        "metadata": {
+            "doc_type": "graph",
+            "source": "neo4j",
+            "part_number": pn,
+            "standard": req["standard"],
+            "verdict": verdict,
+        },
+        "score": 1.0,
+    }]
+
+
 def assessment_to_documents(assessment: dict) -> list[dict]:
     """그래프 판정 결과를 generator 가 인용할 수 있는 텍스트 문서로 변환."""
     if not assessment:
@@ -175,6 +231,7 @@ def assessment_to_documents(assessment: dict) -> list[dict]:
                 "doc_type": "graph",
                 "source": "neo4j",
                 "part_number": r["part_number"],
+                "assembly": assessment["assembly"],  # 어셈블리 출처 추적용
                 "standard": req["standard"],
                 "verdict": r["verdict"],
             },

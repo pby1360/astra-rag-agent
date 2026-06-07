@@ -30,7 +30,10 @@ EXAMPLES = {
     ),
 }
 
-DOC_TYPE_ICON = {"graph": "🔗", "standard": "📄", "component": "🔩", "glossary": "📖"}
+DOC_TYPE_ICON = {
+    "graph": "🔗", "standard": "📄", "component": "🔩",
+    "requirement": "📊", "glossary": "📖",
+}
 VERDICT_COLOR = {"PASS": "normal", "FAIL": "inverse", "INSUFFICIENT": "off"}
 
 
@@ -80,16 +83,39 @@ def render_verdict_banner(answer: str, sources: list) -> None:
 
 
 def render_sources(sources: list) -> None:
+    """답변 본문의 [N] 인용 번호와 시각적으로 일치하도록 출처를 렌더링한다.
+
+    - 각 항목 라벨 앞에 `[N]` 을 표기 (N = generator 가 매긴 cite_index)
+    - doc_type 그룹은 유지하되, 그룹 내에서는 cite_index 오름차순으로 정렬
+    - cite_index 누락 시(역호환) 입력 순서를 1-base 폴백으로 사용
+    """
     if not sources:
         return
 
-    # doc_type별 분리
-    graph_docs = [s for s in sources if s.get("doc_type") == "graph"]
-    std_docs   = [s for s in sources if s.get("doc_type") == "standard"]
-    comp_docs  = [s for s in sources if s.get("doc_type") == "component"]
+    # cite_index 폴백: 구버전 메시지에도 안전하게 동작
+    for i, s in enumerate(sources, start=1):
+        s.setdefault("cite_index", i)
 
-    with st.expander(f"📚 참조 문서 {len(sources)}개", expanded=False):
-        # 그래프 판정 결과 (있을 때만)
+    def _grp(t: str) -> list:
+        return sorted(
+            [s for s in sources if s.get("doc_type") == t],
+            key=lambda x: x["cite_index"],
+        )
+
+    graph_docs = _grp("graph")
+    std_docs   = _grp("standard")
+    comp_docs  = _grp("component")
+    req_docs   = _grp("requirement")
+    other_docs = sorted(
+        [s for s in sources if s.get("doc_type") not in
+         {"graph", "standard", "component", "requirement"}],
+        key=lambda x: x["cite_index"],
+    )
+
+    with st.expander(f"📚 참조 문서 {len(sources)}개 (본문 [N] 과 동일 번호)", expanded=False):
+        first_group = True
+
+        # 그래프 판정 결과
         if graph_docs:
             st.markdown("**🔗 지식그래프 판정**")
             cols = st.columns(min(len(graph_docs), 3))
@@ -97,34 +123,60 @@ def render_sources(sources: list) -> None:
                 badge = {"PASS": "🟢", "FAIL": "🔴", "INSUFFICIENT": "🟡"}.get(
                     s.get("verdict", ""), "⚪"
                 )
+                pn = s.get("part_number") or s.get("label", "")
                 with cols[i % 3]:
                     st.markdown(
-                        f"{badge} **{s.get('part_number', s.get('label', ''))}**  \n"
+                        f"{badge} **[{s['cite_index']}] {pn}**  \n"
                         f"<small>{s.get('verdict', '-')}</small>",
                         unsafe_allow_html=True,
                     )
-            st.divider()
+            first_group = False
+
+        # 규격 요구치 (REQ-*)
+        if req_docs:
+            if not first_group:
+                st.divider()
+            st.markdown("**📊 규격 요구치**")
+            for s in req_docs:
+                st.markdown(f"`[{s['cite_index']}] {s.get('label', '')}`")
+                if s.get("snippet"):
+                    st.caption(s["snippet"].replace("\n", " ")[:160] + "…")
+            first_group = False
 
         # 규격 문서
         if std_docs:
+            if not first_group:
+                st.divider()
             st.markdown("**📄 규격 문서**")
             for s in std_docs:
                 relevance = min(int(s.get("score", 0) * 5), 5)
                 bar = "█" * relevance + "░" * (5 - relevance)
                 st.markdown(
-                    f"`{s.get('label', '')}` &nbsp; `{bar}`",
+                    f"`[{s['cite_index']}] {s.get('label', '')}` &nbsp; `{bar}`",
                     unsafe_allow_html=True,
                 )
                 if s.get("snippet"):
                     st.caption(s["snippet"].replace("\n", " ")[:160] + "…")
+            first_group = False
 
         # 부품 문서
         if comp_docs:
-            if std_docs:
+            if not first_group:
                 st.divider()
             st.markdown("**🔩 부품 데이터**")
             for s in comp_docs:
-                st.markdown(f"`{s.get('label', '')}`")
+                st.markdown(f"`[{s['cite_index']}] {s.get('label', '')}`")
+                if s.get("snippet"):
+                    st.caption(s["snippet"].replace("\n", " ")[:160] + "…")
+            first_group = False
+
+        # 기타(glossary 등)
+        if other_docs:
+            if not first_group:
+                st.divider()
+            st.markdown("**📖 기타**")
+            for s in other_docs:
+                st.markdown(f"`[{s['cite_index']}] {s.get('label', '')}`")
                 if s.get("snippet"):
                     st.caption(s["snippet"].replace("\n", " ")[:160] + "…")
 

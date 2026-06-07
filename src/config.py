@@ -29,6 +29,8 @@ OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 CHAT_MODEL = os.getenv("OPENAI_CHAT_MODEL", "gpt-4o-mini")
 REPORT_MODEL = os.getenv("OPENAI_REPORT_MODEL", "gpt-4o")
 EMBED_MODEL = os.getenv("OPENAI_EMBED_MODEL", "text-embedding-3-small")
+# LLM 호출 타임아웃(초) — 무한 대기 방지 (generator 에서 예외 시 청크 원문 폴백)
+LLM_TIMEOUT_SEC = float(os.getenv("OPENAI_TIMEOUT_SEC", "30"))
 
 # --- LlamaParse ---
 LLAMA_CLOUD_API_KEY = os.getenv("LLAMA_CLOUD_API_KEY")
@@ -48,7 +50,7 @@ def get_openai_client():
         raise RuntimeError(
             "OPENAI_API_KEY 가 설정되지 않았습니다. .env 파일을 확인하세요."
         )
-    return OpenAI(api_key=OPENAI_API_KEY)
+    return OpenAI(api_key=OPENAI_API_KEY, timeout=LLM_TIMEOUT_SEC, max_retries=2)
 
 
 @lru_cache(maxsize=1)

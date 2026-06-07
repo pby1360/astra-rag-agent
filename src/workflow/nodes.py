@@ -17,13 +17,48 @@ CATEGORY_KEYWORDS = {
     "corrosion": ["염수", "소금물", "salt fog", "부식", "코팅", "corrosion", "coating"],
 }
 
+# 질의 유형(A/B/C/D) 결정론적 라우팅 키워드.
+# 우선순위: D(절차) > B(판정) > A(기준) > C(설명). 더 구체적인 의도가 먼저 매칭되어야
+# 카테고리 청크 혼입으로 인한 응답 형식 오선택을 막을 수 있다.
+TYPE_D_KEYWORDS = [  # 시험 절차/방법
+    "절차", "방법", "순서", "어떻게", "단계", "시험 방법", "시험방법",
+    "procedure", "how to", "steps", "step ",
+]
+TYPE_B_KEYWORDS = [  # 적합성 판정
+    "충족", "통과", "미달", "적합", "부적합", "합격", "불합격", "만족",
+    "기준 미달", "위반", "넘는지", "넘어", "pass", "fail",
+]
+TYPE_A_KEYWORDS = [  # 규격 기준값 조회
+    "얼마", "몇 ", "기준이 뭐", "기준치", "기준값", "허용치", "허용값", "threshold",
+    "맞춰야", "되어야", "이상이어야", "이하이어야",
+]
+
 
 def detect_category(query: str) -> str | None:
+    """진동/방사선/부식 카테고리 감지. 절차 질의에서는 임계치 청크 혼입을
+    막기 위해 호출 측(analyze_node)에서 query_type=='D' 일 때 None 으로 덮어쓴다."""
     q = query.lower()
     for cat, kws in CATEGORY_KEYWORDS.items():
         if any(kw in q for kw in kws):
             return cat
     return None
+
+
+def detect_query_type(query: str) -> str:
+    """질의 유형(A/B/C/D) 결정론적 분류.
+
+    LLM 에게 유형 선택을 맡기지 않고 라우터가 먼저 확정한다. 우선순위는
+    의도가 더 구체적인 D(절차) → B(판정) → A(기준) 순. 어디에도 매칭되지
+    않으면 C(설명)로 폴백한다.
+    """
+    q = query.lower()
+    if any(kw in q for kw in TYPE_D_KEYWORDS):
+        return "D"
+    if any(kw in q for kw in TYPE_B_KEYWORDS):
+        return "B"
+    if any(kw in q for kw in TYPE_A_KEYWORDS):
+        return "A"
+    return "C"
 
 
 def _merge(existing: list, new: list) -> list:
@@ -35,13 +70,19 @@ def analyze_node(state: RAGState) -> dict:
     q = state["question"]
     expanded = expand_query_ko_en(q)
     known = gr.find_known_components(q)
+    query_type = detect_query_type(q)
     category = detect_category(q)
+    # 절차/방법 질의(D)에서는 그래프 임계치 청크(REQ-*) 혼입을 차단해
+    # "절차를 물었는데 기준값을 답하는" 라우팅 오류를 방지한다.
+    if query_type == "D":
+        category = None
     return {
         "expanded_query": expanded,
         "known_components": known,
         "category": category,
+        "query_type": query_type,
         "trace": state.get("trace", []) + [
-            f"[analyze] 부품인식={known or '없음'}, 카테고리={category or '없음'}"
+            f"[analyze] 유형={query_type}, 부품인식={known or '없음'}, 카테고리={category or '없음'}"
         ],
     }
 
@@ -52,13 +93,24 @@ def retrieve_node(state: RAGState) -> dict:
     q = state["question"]
     category = state.get("category")
 
-    # 1) 그래프: 조립체면 의존성 순회, 리프 부품이면 직접 노드 스펙 조회
+    # 1) 그래프: 조립체면 의존성 순회, 리프 부품이면 단일 결정론 판정
     graph_docs: list = []
     for pn in state.get("known_components", []):
         subs = gr.get_subcomponents(pn)
         if subs and category:
             assessment = gr.assess_assembly(pn, category)
             graph_docs += gr.assessment_to_documents(assessment)
+        elif category:
+            # 리프 부품 + 카테고리: 단일 부품을 규격 임계치와 직접 대조해 결정론적 판정
+            single_docs = gr.single_assessment_to_document(
+                gr.assess_single_component(pn, category)
+            )
+            if single_docs:
+                graph_docs += single_docs
+            else:
+                doc = gr.get_component_as_document(pn)
+                if doc:
+                    graph_docs.append(doc)
         else:
             doc = gr.get_component_as_document(pn)
             if doc:
@@ -80,6 +132,7 @@ def retrieve_node(state: RAGState) -> dict:
 
 def verify_node(state: RAGState) -> dict:
     docs = state.get("docs", [])
+    query_type = state.get("query_type", "C")
     # 그래프 판정(PASS/FAIL)이 이미 있으면 LLM 호출 없이 SUFFICIENT 확정
     has_verdict = any(
         d.get("metadata", {}).get("verdict") in ("PASS", "FAIL")
@@ -88,7 +141,7 @@ def verify_node(state: RAGState) -> dict:
     if has_verdict:
         sufficient = True
     else:
-        sufficient = is_sufficient(state["question"], docs)
+        sufficient = is_sufficient(state["question"], docs, query_type)
     return {
         "is_sufficient": sufficient,
         "trace": state.get("trace", []) + [
@@ -98,7 +151,9 @@ def verify_node(state: RAGState) -> dict:
 
 
 def report_node(state: RAGState) -> dict:
-    result = generate_answer(state["question"], state.get("docs", []))
+    result = generate_answer(
+        state["question"], state.get("docs", []), state.get("query_type", "C")
+    )
     return {
         "answer": result["answer"],
         "sources": result["sources"],

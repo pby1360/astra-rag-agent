@@ -91,3 +91,77 @@ scenarios:
     expect_not:
       - "PASS"
       - "FAIL"
+
+  # ─── 라우팅 4유형 + 검색 경로 확장 커버리지 (2026-06-07 추가) ───
+
+  - id: S8_D1_method_procedure
+    name: "Method 514 진동 시험 절차 (유형 D 라우팅)"
+    question: "MIL-STD-810H Method 514의 진동 시험 절차는 어떻게 진행해?"
+    expect_keywords:
+      - "514"
+    expect_sources:
+      - "514"
+    expect_not:
+      - "PASS"
+      - "FAIL"
+      - "8.8"  # Falcon 9 임계치 혼입 차단(category 비활성화 검증)
+
+  - id: S9_B5_compare_tid
+    name: "TID 내성 부품 비교 (다중 부품 · 유형 B)"
+    question: "XQR5VFX130과 RAD750 중에서 TID 내성이 더 높은 부품은?"
+    expect_keywords:
+      - "XQR5VFX130"
+      - "1000"
+    expect_sources:
+      - "XQR5VFX130"
+      - "RAD750"
+    expect_not:
+      - "정보 없음"
+
+  - id: S10_C5_list_ldo
+    name: "우주용 LDO 후보 나열 (유형 C)"
+    question: "현재 등록된 우주용 LDO(전원 IC) 부품에는 어떤 것들이 있어?"
+    expect_keywords:
+      - "TPS7H1101"
+      - "TPS7A4501"
+    expect_sources:
+      - "TPS7H1101"
+      - "TPS7A4501"
+    expect_not:
+      - "PASS"
+      - "FAIL"
+
+  - id: S11_F3_method_diff
+    name: "Method 514 vs Method 516 차이"
+    question: "MIL-STD-810H Method 514와 Method 516의 차이점은 뭐야?"
+    expect_keywords:
+      - "진동"
+      - "충격"
+    expect_sources:
+      - "514"
+      - "516"
+    expect_not:
+      - "PASS"
+      - "FAIL"
+
+  - id: S12_E1_saltfog_procedure
+    name: "염수 분무 절차 (글로서리 확장 + 유형 D)"
+    question: "소금물 테스트는 어떻게 진행해?"
+    expect_keywords:
+      - "509"
+    expect_sources:
+      - "509"
+    expect_not:
+      - "PASS"
+      - "FAIL"
+      - "20"  # 코팅 두께 임계치 혼입 차단
+
+  - id: S13_G2_unknown_part_safe
+    name: "미등록 부품 안전 종료 (radiation)"
+    question: "UNKNOWN-PROC-ABC123이 GEO 임무 TID 기준을 통과해?"
+    expect_keywords:
+      - "정보 없음"
+    expect_sources: []
+    expect_not:
+      - "PASS"
+      - "FAIL"
