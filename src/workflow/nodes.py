@@ -5,10 +5,14 @@
 """
 from __future__ import annotations
 
+import logging
+
 from src.generation.generator import generate_answer, is_sufficient
 from src.retrieval import graph_retriever as gr
 from src.retrieval.hybrid import expand_query_ko_en, hybrid_retrieve
 from src.workflow.state import RAGState
+
+logger = logging.getLogger(__name__)
 
 # 질의 -> 판정 카테고리 (그래프 의존성 판정용)
 CATEGORY_KEYWORDS = {
@@ -20,9 +24,12 @@ CATEGORY_KEYWORDS = {
 # 질의 유형(A/B/C/D) 결정론적 라우팅 키워드.
 # 우선순위: D(절차) > B(판정) > A(기준) > C(설명). 더 구체적인 의도가 먼저 매칭되어야
 # 카테고리 청크 혼입으로 인한 응답 형식 오선택을 막을 수 있다.
-TYPE_D_KEYWORDS = [  # 시험 절차/방법
-    "절차", "방법", "순서", "어떻게", "단계", "시험 방법", "시험방법",
-    "procedure", "how to", "steps", "step ",
+# 절차형(D) 키워드 — 강함: 단독으로 D 확정 / 약함: 판정어(B)가 없을 때만 D
+TYPE_D_STRONG_KEYWORDS = [  # 절차-특정 표현
+    "절차", "시험 방법", "시험방법", "단계", "procedure", "steps", "step ",
+]
+TYPE_D_WEAK_KEYWORDS = [  # 일반 표현 — B 의도(충족/통과/판정 등)가 함께 있으면 D로 보지 않음
+    "어떻게", "방법", "순서", "how to",
 ]
 TYPE_B_KEYWORDS = [  # 적합성 판정
     "충족", "통과", "미달", "적합", "부적합", "합격", "불합격", "만족",
@@ -52,9 +59,12 @@ def detect_query_type(query: str) -> str:
     않으면 C(설명)로 폴백한다.
     """
     q = query.lower()
-    if any(kw in q for kw in TYPE_D_KEYWORDS):
+    has_b = any(kw in q for kw in TYPE_B_KEYWORDS)
+    if any(kw in q for kw in TYPE_D_STRONG_KEYWORDS):
         return "D"
-    if any(kw in q for kw in TYPE_B_KEYWORDS):
+    if any(kw in q for kw in TYPE_D_WEAK_KEYWORDS) and not has_b:
+        return "D"
+    if has_b:
         return "B"
     if any(kw in q for kw in TYPE_A_KEYWORDS):
         return "A"
@@ -69,7 +79,11 @@ def _merge(existing: list, new: list) -> list:
 def analyze_node(state: RAGState) -> dict:
     q = state["question"]
     expanded = expand_query_ko_en(q)
-    known = gr.find_known_components(q)
+    try:
+        known = gr.find_known_components(q)
+    except Exception as exc:  # Neo4j 장애 시 그래프 없이 진행(하이브리드 검색만)
+        logger.error("부품 식별 실패(%s) — 그래프 없이 진행", exc)
+        known = []
     query_type = detect_query_type(q)
     category = detect_category(q)
     # 절차/방법 질의(D)에서는 그래프 임계치 청크(REQ-*) 혼입을 차단해
@@ -95,29 +109,37 @@ def retrieve_node(state: RAGState) -> dict:
 
     # 1) 그래프: 조립체면 의존성 순회, 리프 부품이면 단일 결정론 판정
     graph_docs: list = []
-    for pn in state.get("known_components", []):
-        subs = gr.get_subcomponents(pn)
-        if subs and category:
-            assessment = gr.assess_assembly(pn, category)
-            graph_docs += gr.assessment_to_documents(assessment)
-        elif category:
-            # 리프 부품 + 카테고리: 단일 부품을 규격 임계치와 직접 대조해 결정론적 판정
-            single_docs = gr.single_assessment_to_document(
-                gr.assess_single_component(pn, category)
-            )
-            if single_docs:
-                graph_docs += single_docs
+    try:
+        for pn in state.get("known_components", []):
+            subs = gr.get_subcomponents(pn)
+            if subs and category:
+                assessment = gr.assess_assembly(pn, category, q)
+                graph_docs += gr.assessment_to_documents(assessment)
+            elif category:
+                # 리프 부품 + 카테고리: 단일 부품을 규격 임계치와 직접 대조해 결정론적 판정
+                single_docs = gr.single_assessment_to_document(
+                    gr.assess_single_component(pn, category, q)
+                )
+                if single_docs:
+                    graph_docs += single_docs
+                else:
+                    doc = gr.get_component_as_document(pn)
+                    if doc:
+                        graph_docs.append(doc)
             else:
                 doc = gr.get_component_as_document(pn)
                 if doc:
                     graph_docs.append(doc)
-        else:
-            doc = gr.get_component_as_document(pn)
-            if doc:
-                graph_docs.append(doc)
+    except Exception as exc:  # Neo4j 장애 시 그래프 근거 없이 하이브리드로 진행
+        logger.error("그래프 검색 실패(%s) — 하이브리드 검색만 사용", exc)
+        graph_docs = []
 
     # 2) 하이브리드 (Dense + BM25 + 한영확장)
-    hybrid_docs = hybrid_retrieve(q, k=k)
+    try:
+        hybrid_docs = hybrid_retrieve(q, k=k)
+    except Exception as exc:  # Chroma/임베딩 장애 시 그래프 근거만으로 진행
+        logger.error("하이브리드 검색 실패(%s) — 그래프 근거만 사용", exc)
+        hybrid_docs = []
 
     docs = _merge(state.get("docs", []), graph_docs)
     docs = _merge(docs, hybrid_docs)

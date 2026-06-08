@@ -8,6 +8,7 @@
 from __future__ import annotations
 
 import logging
+import re
 
 from src import config
 
@@ -100,17 +101,60 @@ def get_component_as_document(part_number: str) -> dict | None:
     }
 
 
-def get_requirement_by_category(category: str) -> dict | None:
+def _select_requirement(query: str | None, candidates: list[dict]) -> dict | None:
+    """동일 카테고리에 요구치가 여러 개일 때, 질의 키워드로 가장 적합한 요구치를 고른다.
+
+    각 후보의 (standard+description+id)에서 '다른 후보에는 없는' 식별 토큰을 뽑아,
+    질의에 등장하는 식별 토큰 수가 가장 많은 후보를 선택한다. 매칭이 없으면
+    MIL-STD 기준(없으면 id 사전순)을 결정론적 기본값으로 사용한다.
+    """
+    if not candidates:
+        return None
+    if len(candidates) == 1:
+        return candidates[0]
+    q = (query or "").lower()
+
+    def toks(r: dict) -> set[str]:
+        text = f"{r.get('standard','')} {r.get('description','')} {r.get('id','')}".lower()
+        return set(re.findall(r"[a-z0-9]+|[가-힣]+", text))
+
+    token_sets = [toks(r) for r in candidates]
+    best, best_score = None, -1
+    for i, r in enumerate(candidates):
+        others: set[str] = set().union(
+            *[s for j, s in enumerate(token_sets) if j != i]
+        )
+        discriminating = token_sets[i] - others
+        score = sum(1 for t in discriminating if len(t) >= 2 and t in q)
+        if score > best_score:
+            best, best_score = r, score
+    if best_score <= 0:
+        mil = [r for r in candidates
+               if str(r.get("standard", "")).upper().startswith("MIL-STD")]
+        return sorted(mil or candidates, key=lambda r: str(r.get("id", "")))[0]
+    return best
+
+
+def get_requirement_by_category(category: str, query: str | None = None) -> dict | None:
+    """카테고리 요구치를 반환한다. 동일 카테고리에 여러 요구치가 있으면
+    질의 키워드(예: Category 24 / Falcon / GEO / Starlink)로 정확히 선택한다."""
     rows = _run(
         "MATCH (st:Standard)-[:HAS_REQUIREMENT]->(r:Requirement {category:$cat}) "
-        "RETURN r AS r, st.name AS standard LIMIT 1",
+        "RETURN r AS r, st.name AS standard",
         cat=category,
     )
     if not rows:
         return None
-    req = dict(rows[0]["r"])
-    req["standard"] = rows[0]["standard"]
-    return req
+    candidates = []
+    for row in rows:
+        req = dict(row["r"])
+        req["standard"] = row["standard"]
+        candidates.append(req)
+    chosen = _select_requirement(query, candidates)
+    if chosen and len(candidates) > 1:
+        logger.info("요구치 선택 | 카테고리=%s | 후보 %d개 → %s",
+                    category, len(candidates), chosen.get("id"))
+    return chosen
 
 
 def _judge(value, operator: str, threshold) -> str:
@@ -123,13 +167,13 @@ def _judge(value, operator: str, threshold) -> str:
     return "INSUFFICIENT"
 
 
-def assess_assembly(assembly_pn: str, category: str, max_depth: int = 3) -> dict | None:
+def assess_assembly(assembly_pn: str, category: str, query: str | None = None, max_depth: int = 3) -> dict | None:
     """조립체 하위 부품을 해당 카테고리 요구치와 대조해 판정한다 (시나리오 1).
 
     반환: {requirement, results:[{part_number,name,value,verdict,standards}, ...]}
     """
     logger.info("조립체 평가 시작 | %s | 카테고리=%s", assembly_pn, category)
-    req = get_requirement_by_category(category)
+    req = get_requirement_by_category(category, query)
     if req is None:
         logger.warning("요구치 없음 | 카테고리=%s", category)
         return None
@@ -151,7 +195,7 @@ def assess_assembly(assembly_pn: str, category: str, max_depth: int = 3) -> dict
     return {"requirement": req, "assembly": assembly_pn, "results": results}
 
 
-def assess_single_component(part_number: str, category: str) -> dict | None:
+def assess_single_component(part_number: str, category: str, query: str | None = None) -> dict | None:
     """리프(하위 부품 없는) 부품 1개를 카테고리 요구치와 직접 대조해 판정한다 (시나리오 S1b).
 
     조립체가 아닌 단일 부품 질의에서도 그래프 노드의 스펙과 규격 임계치를
@@ -163,7 +207,7 @@ def assess_single_component(part_number: str, category: str) -> dict | None:
     node = get_component(part_number)
     if node is None:
         return None
-    req = get_requirement_by_category(category)
+    req = get_requirement_by_category(category, query)
     if req is None:
         return None
     node = dict(node)
