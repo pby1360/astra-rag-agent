@@ -5,6 +5,7 @@
 scenarios:
   - id: S1_vibration_cascade
     name: "진동 규격 연쇄 위반 탐지 (GraphRAG)"
+    expect_type: "B"   # 적합성 판정
     question: "LV-ENGINE-X 엔진의 진동 규격이 MIL-STD-810H Method 514 Category 24로 상향되면, 하위 부품 중 기준 미달인 것을 모두 찾아줘."
     expect_keywords:
       - "AVIONICS-MOD-E"
@@ -16,6 +17,7 @@ scenarios:
 
   - id: S1b_vibration_single
     name: "단일 부품 진동 판정 (FAIL)"
+    expect_type: "B"
     question: "FUEL-VALVE-C의 진동 내구(g rms)가 MIL-STD-810H Category 24 기준을 충족하는지 판정해줘."
     expect_keywords:
       - "9.5"
@@ -27,6 +29,7 @@ scenarios:
 
   - id: S2_radiation
     name: "COTS 방사선 교차검증"
+    expect_type: "B"
     question: "TI TPS7H1101-SP를 GEO 15년 임무에 쓰려는데 방사선(TID) 기준을 충족해?"
     expect_keywords:
       - "100"
@@ -37,6 +40,7 @@ scenarios:
 
   - id: S3_saltfog_ko
     name: "염수분무 코팅 두께 (한국어 쿼리)"
+    expect_type: "A"   # 기준값 조회
     question: "K-방산 수출용 안테나 전개 장치, 염수 분무(소금물) 테스트 통과하려면 내부식성 코팅 두께를 얼마로 해야 해?"
     expect_keywords:
       - "20"
@@ -47,6 +51,7 @@ scenarios:
 
   - id: S4_self_correction
     name: "Self-correction 데모 (존재하지 않는 부품)"
+    expect_type: "B"
     question: "UNKNOWN-PART-ZZZ9의 진동 내구가 Category 24를 충족하는지 판정해줘."
     expect_keywords:
       - "정보 없음"
@@ -57,6 +62,7 @@ scenarios:
 
   - id: S5_spacex_starlink_tid
     name: "SpaceX Starlink 방사선 내성 종합 판정 (GraphRAG)"
+    expect_type: "B"
     question: "STARLINK-SAT-GEN2 위성 어셈블리의 하위 부품들이 Starlink 550km LEO 5년 임무 방사선(TID) 요구치를 모두 충족하는지 판정해줘."
     expect_keywords:
       - "15"
@@ -69,6 +75,7 @@ scenarios:
 
   - id: S6_spacex_falcon9_vibration
     name: "Falcon 9 발사 진동 기준 조회"
+    expect_type: "A"
     question: "Falcon 9으로 발사할 때 페이로드에 가해지는 랜덤 진동 기준이 얼마야?"
     expect_keywords:
       - "8.8"
@@ -81,6 +88,7 @@ scenarios:
 
   - id: S7_spacex_rad750_description
     name: "RAD750 부품 설명 (유형 C)"
+    expect_type: "C"   # 설명
     question: "BAE Systems RAD750 프로세서에 대해 설명해봐."
     expect_keywords:
       - "RAD750"
@@ -96,6 +104,7 @@ scenarios:
 
   - id: S8_D1_method_procedure
     name: "Method 514 진동 시험 절차 (유형 D 라우팅)"
+    expect_type: "D"   # 절차
     question: "MIL-STD-810H Method 514의 진동 시험 절차는 어떻게 진행해?"
     expect_keywords:
       - "514"
@@ -120,6 +129,7 @@ scenarios:
 
   - id: S10_C5_list_ldo
     name: "우주용 LDO 후보 나열 (유형 C)"
+    expect_type: "C"
     question: "현재 등록된 우주용 LDO(전원 IC) 부품에는 어떤 것들이 있어?"
     expect_keywords:
       - "TPS7H1101"
@@ -133,6 +143,7 @@ scenarios:
 
   - id: S11_F3_method_diff
     name: "Method 514 vs Method 516 차이"
+    expect_type: "C"
     question: "MIL-STD-810H Method 514와 Method 516의 차이점은 뭐야?"
     expect_keywords:
       - "진동"
@@ -146,6 +157,7 @@ scenarios:
 
   - id: S12_E1_saltfog_procedure
     name: "염수 분무 절차 (글로서리 확장 + 유형 D)"
+    expect_type: "D"
     question: "소금물 테스트는 어떻게 진행해?"
     expect_keywords:
       - "509"
@@ -158,6 +170,7 @@ scenarios:
 
   - id: S13_G2_unknown_part_safe
     name: "미등록 부품 안전 종료 (radiation)"
+    expect_type: "B"
     question: "UNKNOWN-PROC-ABC123이 GEO 임무 TID 기준을 통과해?"
     expect_keywords:
       - "정보 없음"
